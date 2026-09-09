@@ -6,6 +6,7 @@
  *  - same input always gives the same output (easy to unit test)
  *  - anything that only one feature needs lives in that feature instead
  */
+export * from './calendar'
 export * from './formatters'
 export * from './helpers'
 export * from './validators'

@@ -1,1 +1,1 @@
-export * from './slides'
+export * from './hero'

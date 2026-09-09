@@ -18,6 +18,12 @@ npm run dev
 | `npm run lint`    | ESLint over the project               |
 | `npm run preview` | Serve the production build            |
 
+## Design
+
+Colour, type, glass and motion tokens live in `src/index.css` and are documented
+in [docs/design-system.md](docs/design-system.md). Read it before adding a new
+surface or animation — use a token rather than a literal value.
+
 ## Folder structure
 
 Feature-first: code that changes together lives together. A new feature is a
@@ -37,9 +43,14 @@ src/
 ├── config/               # env.ts — the only place import.meta.env is read
 ├── constants/            # app-wide constant values
 ├── features/             # one folder per domain capability
+│   ├── auth/
+│   │   ├── api/          # login / logout mutations
+│   │   ├── components/   # AccountMenu (header popover), LoginForm
+│   │   ├── authSlice.ts  # session user + token
+│   │   └── index.ts
 │   ├── home/
 │   │   ├── components/   # Hero
-│   │   └── constants/    # hero slides
+│   │   └── constants/    # hero background and copy
 │   ├── search/
 │   │   ├── components/   # SearchBar
 │   │   ├── searchSlice.ts
@@ -103,6 +114,10 @@ export const { useSearchSpotsQuery } = spotsApi
 Because endpoints only register when their module is loaded, feature APIs that
 no mounted component imports yet are imported in `app/store.ts`.
 
-Anything that is not server data — the hero search form, UI toggles — goes in a
-slice, as `features/search/searchSlice.ts` does. Read and write it through the
-typed `useAppSelector` / `useAppDispatch` in `app/hooks.ts`.
+Anything that is not server data — the hero search form, the signed-in user —
+goes in a slice, as `features/search/searchSlice.ts` and
+`features/auth/authSlice.ts` do. Read and write it through the typed
+`useAppSelector` / `useAppDispatch` in `app/hooks.ts`.
+
+Components never unpack an RTK Query error themselves: `getApiErrorMessage` in
+`services/api/errors.ts` turns the error union into a sentence to display.

@@ -3,14 +3,17 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 import { baseApi } from '@/services/api'
 // Import slices from their module, not the feature barrel: the barrel also
 // exports components, which would pull React files into the store graph.
+import { authReducer } from '@/features/auth/authSlice'
 import { searchReducer } from '@/features/search/searchSlice'
 // Endpoints only register when their module is loaded, so features that no
 // mounted component imports yet are pulled in here.
+import '@/features/auth/api/authApi'
 import '@/features/spots/api/spotsApi'
 
 export const store = configureStore({
   reducer: {
     [baseApi.reducerPath]: baseApi.reducer,
+    auth: authReducer,
     search: searchReducer,
   },
   middleware: (getDefaultMiddleware) =>

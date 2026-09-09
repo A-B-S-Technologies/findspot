@@ -1,4 +1,6 @@
-import { Header } from '@/components/layout'
+import { Header, MainNav } from '@/components/layout'
+import { useAppSelector } from '@/app/hooks'
+import { AccountMenu, UserMenu, selectIsAuthenticated } from '@/features/auth'
 import { Hero } from '@/features/home'
 
 /**
@@ -6,10 +8,16 @@ import { Hero } from '@/features/home'
  * else. Features stay unaware of where they are rendered.
  */
 function HomePage() {
+  const isAuthenticated = useAppSelector(selectIsAuthenticated)
+
   return (
     <main className="min-h-screen bg-slate-900">
       <div className="relative">
-        <Header />
+        <Header
+          action={
+            isAuthenticated ? <MainNav menu={<UserMenu />} /> : <AccountMenu />
+          }
+        />
         <Hero />
       </div>
     </main>

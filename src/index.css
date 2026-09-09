@@ -1,7 +1,97 @@
 @import 'tailwindcss';
 
+/* ---------------------------------------------------------------------------
+ * Design tokens. Everything visual should come from here rather than a
+ * one-off hex value in a component. See docs/design-system.md.
+ * ------------------------------------------------------------------------- */
 @theme {
+  /* Small phones need a step between the base styles and `sm` (640px) */
+  --breakpoint-xs: 26rem;
+
   --font-display: 'Quicksand', ui-rounded, 'Segoe UI', system-ui, sans-serif;
+
+  /* Primary action blue */
+  --color-brand-400: #4fbdf0;
+  --color-brand-500: #1ba1e2;
+  --color-brand-600: #178dc7;
+
+  /* Navy surfaces, darkest first — the login popover is built from these */
+  --color-surface-900: #071f38;
+  --color-surface-800: #0b2743;
+  --color-surface-700: #0e3050;
+  --color-surface-600: #123c63;
+
+  /* Hero photo wash */
+  --color-wash-500: #1b3a6b;
+  --color-wash-700: #0f2647;
+
+  /* Decelerating curve: quick to start, soft to land. Used by every
+   * transition and entrance so motion feels like one system. */
+  --ease-glass: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-pop-in: pop-in 180ms var(--ease-glass);
+  --animate-fade-in: fade-in 220ms var(--ease-glass);
+  --animate-month-next: month-next 220ms var(--ease-glass);
+  --animate-month-prev: month-prev 220ms var(--ease-glass);
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Month grids travel in the direction the user asked for */
+@keyframes month-next {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes month-prev {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+:root {
+  /* Motion scale — fast for state, base for entrances, slow for ambience */
+  --motion-fast: 150ms;
+  --motion-base: 220ms;
+  --motion-slow: 400ms;
+
+  /* Glass recipe, in one place so every frosted surface matches */
+  --glass-blur: 20px;
+  --glass-saturate: 160%;
+  --glass-tint-strong: rgb(255 255 255 / 0.18);
+  --glass-tint-soft: rgb(255 255 255 / 0.06);
+  --glass-border: rgb(255 255 255 / 0.25);
+  --glass-highlight: rgb(255 255 255 / 0.3);
+  --glass-shadow: 0 8px 40px rgb(3 14 28 / 0.28);
 }
 
 html,
@@ -14,4 +104,100 @@ body {
   margin: 0;
   font-family: var(--font-display);
   -webkit-font-smoothing: antialiased;
+}
+
+@layer base {
+  /**
+   * Tailwind v4's preflight leaves buttons at `cursor: default`. Anything that
+   * responds to a click should say so, so the affordance is set once here
+   * rather than remembered on every component.
+   */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  a[href],
+  label[for],
+  summary,
+  select {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role='button'][aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
+  /**
+   * Native number spinners cannot be styled and look nothing like the rest of
+   * the app. They are removed everywhere; number fields pair with their own
+   * stepper buttons instead.
+   */
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+  }
+
+  input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+}
+
+@layer components {
+  /**
+   * Frosted container. The three cues that sell glass: a diagonal tint so the
+   * surface catches light unevenly, saturation on the blur so colour bleeds
+   * through, and an inset top highlight reading as the lit edge.
+   */
+  .glass-panel {
+    background-image: linear-gradient(
+      135deg,
+      var(--glass-tint-strong),
+      var(--glass-tint-soft)
+    );
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      var(--glass-shadow),
+      inset 0 1px 0 var(--glass-highlight);
+  }
+
+  /**
+   * A segment inside a glass panel. Transparent at rest so the panel reads as
+   * one sheet, lifting on hover and while focused.
+   */
+  .glass-field {
+    background-color: rgb(255 255 255 / 0);
+    transition:
+      background-color var(--motion-fast) var(--ease-glass),
+      box-shadow var(--motion-fast) var(--ease-glass);
+  }
+
+  .glass-field:hover {
+    background-color: rgb(255 255 255 / 0.08);
+  }
+
+  .glass-field:focus-within {
+    background-color: rgb(255 255 255 / 0.12);
+    box-shadow: inset 0 1px 0 var(--glass-highlight);
+  }
+
+  /* Hairline between segments: a lit edge over a shadowed one */
+  .glass-divider {
+    border-color: rgb(255 255 255 / 0.22);
+  }
+}
+
+/* Honour the OS setting: keep state changes instant, drop the movement. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

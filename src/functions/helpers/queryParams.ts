@@ -15,3 +15,8 @@ export function compactParams(
 
   return result
 }
+
+/** Reads a query parameter from the current URL, e.g. an emailed reset token. */
+export function getQueryParam(name: string): string | null {
+  return new URLSearchParams(window.location.search).get(name)
+}
