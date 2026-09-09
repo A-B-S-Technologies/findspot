@@ -20,25 +20,18 @@ import type { SearchCriteria } from '../searchSlice'
 import LocationField from './LocationField'
 
 type CellProps = {
-  divider?: boolean
   /**
-   * The cell sitting in the pill's rounded corner. It carries the matching
-   * radius itself so the bar does not need `overflow-hidden`, which would clip
-   * any panel opened from inside a cell.
+   * Placement and edges. Each cell carries its own corner radius so the bar
+   * does not need `overflow-hidden`, which would clip any panel opened from
+   * inside a cell.
    */
-  leading?: boolean
+  className?: string
   children: ReactNode
 }
 
-function Cell({ divider = false, leading = false, children }: CellProps) {
+function Cell({ className, children }: CellProps) {
   return (
-    <div
-      className={cn(
-        'glass-field min-w-0 text-left',
-        divider && 'glass-divider border-t sm:border-t-0 sm:border-l',
-        leading && 'rounded-t-[36px] sm:rounded-t-none sm:rounded-l-[36px]',
-      )}
-    >
+    <div className={cn('glass-field glass-divider min-w-0 text-left', className)}>
       {children}
     </div>
   )
@@ -226,15 +219,21 @@ function SearchBar() {
         onSubmit={handleSubmit}
         className="glass-panel w-full rounded-[36px]"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-[1.1fr_0.85fr_0.85fr_1.2fr_84px] sm:items-center lg:grid-cols-[1.1fr_0.85fr_0.85fr_1.2fr_92px]">
-          <Cell leading>
+        {/*
+          Small screens lay out 2x2 - Location and People on top, the dates
+          beneath - with the button spanning the full width under them. The
+          `order-*` classes do that without disturbing the DOM order, which is
+          the reading order the five-column layout wants from `sm` up.
+        */}
+        <div className="grid grid-cols-2 sm:grid-cols-[1.1fr_0.85fr_0.85fr_1.2fr_84px] sm:items-center lg:grid-cols-[1.1fr_0.85fr_0.85fr_1.2fr_92px]">
+          <Cell className="order-1 rounded-tl-[36px] border-r sm:order-none sm:rounded-tl-none sm:rounded-l-[36px] sm:border-r-0">
             <LocationField
               value={draft.location}
               onChange={setField('location')}
             />
           </Cell>
 
-          <Cell divider>
+          <Cell className="order-3 border-t border-r sm:order-none sm:border-t-0 sm:border-r-0 sm:border-l">
             <DateTrigger
               label="Check in"
               value={draft.checkIn}
@@ -244,7 +243,7 @@ function SearchBar() {
             />
           </Cell>
 
-          <Cell divider>
+          <Cell className="order-4 border-t sm:order-none sm:border-t-0 sm:border-l">
             <DateTrigger
               label="Check out"
               value={draft.checkOut}
@@ -254,14 +253,14 @@ function SearchBar() {
             />
           </Cell>
 
-          <Cell divider>
+          <Cell className="order-2 rounded-tr-[36px] sm:order-none sm:rounded-tr-none sm:border-l">
             <PeopleField
               value={draft.people}
               onChange={setField('people')}
             />
           </Cell>
 
-          <div className="flex items-center justify-center pb-4 sm:py-3 sm:pr-4 sm:pl-0">
+          <div className="order-5 col-span-2 flex items-center justify-center pt-1 pb-4 sm:order-none sm:col-span-1 sm:pt-0 sm:py-3 sm:pr-4 sm:pl-0">
             <button
               type="submit"
               aria-label="Search"
