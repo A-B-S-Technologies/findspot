@@ -51,7 +51,7 @@ type DateTriggerProps = {
  */
 function DateTrigger({ label, value, open, onOpen, onClear }: DateTriggerProps) {
   return (
-    <div className="relative px-5 py-3 sm:px-4 sm:py-5 lg:px-6">
+    <div className="relative px-4 py-3 sm:py-5 lg:px-6">
       <button
         type="button"
         onClick={onOpen}
@@ -114,7 +114,7 @@ function PeopleField({ value, onChange }: PeopleFieldProps) {
   }
 
   return (
-    <div className="px-5 py-3 sm:px-4 sm:py-5 lg:px-6">
+    <div className="px-4 py-3 sm:py-5 lg:px-6">
       <label
         htmlFor="people"
         className="block truncate text-[14px] font-semibold text-white lg:text-[15px]"
@@ -180,14 +180,11 @@ function SearchBar() {
 
   const [calendarOpen, setCalendarOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const formRef = useRef<HTMLFormElement>(null)
 
   const closeCalendar = useCallback(() => setCalendarOpen(false), [])
 
-  const { panelRef, maxHeight: calendarMaxHeight } = useAnchoredPanel(
-    calendarOpen,
-    formRef,
-  )
+  const { panelRef, maxHeight: calendarMaxHeight } =
+    useAnchoredPanel(calendarOpen)
 
   useOnClickOutside(containerRef, closeCalendar, calendarOpen)
   useKeyboardShortcuts({ Escape: closeCalendar })
@@ -215,7 +212,6 @@ function SearchBar() {
   return (
     <div ref={containerRef} className="relative mx-auto w-full max-w-[660px]">
       <form
-        ref={formRef}
         onSubmit={handleSubmit}
         className="glass-panel w-full rounded-[36px]"
       >

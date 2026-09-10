@@ -1,53 +1,56 @@
-import { useLayoutEffect, useRef, useState } from 'react'
-import type { RefObject } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 type Options = {
-  /** Never shrink below this, even when the anchor sits near the fold. */
-  minHeight?: number
-  /** Breathing room between the panel and the bottom of the viewport. */
+  /** Breathing room kept between the panel and the edges of the viewport. */
   gap?: number
 }
 
 /**
- * Sizing for a panel anchored under something. The search bar sits mid-hero,
- * so the room beneath it swings wildly by screen: cap the panel to what is
- * actually there, and scroll it into view when it still reaches past the fold.
+ * Sizing and scroll for a panel anchored under a field.
+ *
+ * The panel is capped to the height of the screen rather than to the room left
+ * beneath its anchor, then the page is scrolled far enough to show it. Capping
+ * to the room below looked reasonable on a laptop and broke on a phone: with
+ * the search bar near the fold the panel became a short scrolling window, and
+ * a swipe over it scrolled its own contents — taking its header out of view —
+ * instead of moving the page. Letting it keep its natural height and moving
+ * the page instead means nothing inside it can be scrolled away.
  */
-export function useAnchoredPanel(
-  open: boolean,
-  anchorRef: RefObject<HTMLElement | null>,
-  { minHeight = 280, gap = 24 }: Options = {},
-) {
+export function useAnchoredPanel(open: boolean, { gap = 16 }: Options = {}) {
   const panelRef = useRef<HTMLDivElement>(null)
   const [maxHeight, setMaxHeight] = useState<number>()
 
   useLayoutEffect(() => {
     if (!open) return
 
-    const measure = () => {
-      const anchor = anchorRef.current?.getBoundingClientRect()
-      if (!anchor) return
-      setMaxHeight(
-        Math.max(minHeight, Math.round(window.innerHeight - anchor.bottom - gap)),
-      )
-    }
+    const measure = () =>
+      setMaxHeight(Math.max(200, window.innerHeight - gap * 2))
 
     measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [open, gap])
+
+  /**
+   * Depends on `maxHeight`, so the cap is already on the element by the time
+   * this runs and the measurement is the final one. Measured synchronously on
+   * purpose: deferring to `requestAnimationFrame` meant the scroll silently
+   * never happened whenever that frame was not serviced.
+   */
+  useEffect(() => {
+    if (!open) return
+
+    const panel = panelRef.current
+    if (!panel) return
+
+    const overflow = Math.round(
+      panel.getBoundingClientRect().bottom - window.innerHeight + gap,
+    )
+    if (overflow <= 0) return
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const frame = requestAnimationFrame(() =>
-      panelRef.current?.scrollIntoView({
-        block: 'nearest',
-        behavior: reduced ? 'auto' : 'smooth',
-      }),
-    )
-
-    window.addEventListener('resize', measure)
-    return () => {
-      cancelAnimationFrame(frame)
-      window.removeEventListener('resize', measure)
-    }
-  }, [open, anchorRef, minHeight, gap])
+    window.scrollBy({ top: overflow, behavior: reduced ? 'auto' : 'smooth' })
+  }, [open, maxHeight, gap])
 
   return { panelRef, maxHeight }
 }

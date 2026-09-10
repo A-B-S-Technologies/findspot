@@ -26,13 +26,10 @@ function LocationField({ value, onChange }: LocationFieldProps) {
   const [rawActiveIndex, setActiveIndex] = useState(0)
 
   const wrapperRef = useRef<HTMLDivElement>(null)
-  const anchorRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const { panelRef, maxHeight } = useAnchoredPanel(open, anchorRef, {
-    minHeight: 240,
-  })
+  const { panelRef, maxHeight } = useAnchoredPanel(open)
 
   const matches = useMemo(() => {
     const query = normalizeForSearch(value)
@@ -98,10 +95,7 @@ function LocationField({ value, onChange }: LocationFieldProps) {
 
   return (
     <div ref={wrapperRef} className="relative">
-      <div
-        ref={anchorRef}
-        className="relative px-5 py-3 sm:px-4 sm:py-5 lg:px-6"
-      >
+      <div className="relative px-4 py-3 sm:py-5 lg:px-6">
         <label
           htmlFor="location"
           className="block truncate text-[14px] font-semibold text-white lg:text-[15px]"
